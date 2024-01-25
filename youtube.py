@@ -40,6 +40,7 @@ def get_playlist_by_channel_id(channel_id):
         print(f"Number of Videos: {playlist['contentDetails']['itemCount']}")
         print("------")
 
+# Create a playlist. Returns its id
 def create_playlist():
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
@@ -57,12 +58,42 @@ def create_playlist():
         part="snippet",
         body={
             "snippet": {
-                "title": "Test Playlist"
+                "title": "PLAYLIST TITLE HERE"
             }
         }
     )
 
-    response = request.execute()
+    response = request.execute().get("id")
+    return response
 
-# get_playlist_by_channel_id("UC3J7IS02TU8hWAOR2qfnxXg")
-create_playlist()
+def add_to_playlist():
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
+    api_service_name = "youtube"
+    api_version = "v3"
+    client_secrets_file = "credentials.json"
+
+    flow = InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
+    credentials = flow.run_local_server(port=3000)
+
+    youtube = googleapiclient.discovery.build(
+        api_service_name, api_version, credentials=credentials)
+    
+    request = youtube.playlistItems().insert(
+        part="snippet",
+        body={
+            "snippet": {
+                "playlistId": "PLAYLIST ID HERE",
+                "resourceId": {
+                    "kind": "youtube#video",
+                    "videoId": "VIDEO ID HERE"
+                }
+            }
+        }
+    )
+
+    response = request.execute().get("status")
+    print(response)
+
+# playlistID = create_playlist()
+add_to_playlist()
