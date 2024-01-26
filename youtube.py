@@ -13,18 +13,31 @@ scopes = [
     "https://www.googleapis.com/auth/youtube.force-ssl"
 ]
 
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
+api_service_name = "youtube"
+api_version = "v3"
+client_secrets_file = "credentials.json"
+
+flow = InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
+credentials = flow.run_local_server(port=3000)
+
+youtube = googleapiclient.discovery.build(
+    api_service_name, api_version, credentials=credentials)
+
+def search_for_song(artist, title):
+    
+    request = youtube.search().list(
+        part="snippet",
+        maxResults=5,
+        type="video",
+        q=artist + " " + title
+    )
+    response = request.execute().get("items", [])
+    
+    print(response[0]["id"]["videoId"])
+
 def get_playlist_by_channel_id(channel_id):
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-
-    api_service_name = "youtube"
-    api_version = "v3"
-    client_secrets_file = "credentials.json"
-
-    flow = InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
-    credentials = flow.run_local_server(port=3000)
-
-    youtube = googleapiclient.discovery.build(
-        api_service_name, api_version, credentials=credentials)
     
     request = youtube.playlists().list(
         part="snippet,contentDetails",
@@ -42,17 +55,6 @@ def get_playlist_by_channel_id(channel_id):
 
 # Create a playlist. Returns its id
 def create_playlist():
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-
-    api_service_name = "youtube"
-    api_version = "v3"
-    client_secrets_file = "credentials.json"
-
-    flow = InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
-    credentials = flow.run_local_server(port=3000)
-
-    youtube = googleapiclient.discovery.build(
-        api_service_name, api_version, credentials=credentials)
     
     request = youtube.playlists().insert(
         part="snippet",
@@ -96,4 +98,5 @@ def add_to_playlist():
     print(response)
 
 # playlistID = create_playlist()
-add_to_playlist()
+# get_playlist_by_channel_id("")
+# add_to_playlist()
