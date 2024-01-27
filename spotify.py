@@ -1,7 +1,6 @@
 from dotenv import load_dotenv
 from requests import post, get
 import base64
-import json
 import os
 
 load_dotenv()
@@ -30,23 +29,21 @@ def get_token():
 def get_auth_header(token):
     return { "Authorization": "Bearer " + token }
 
-def get_artist_by_id(token, artist_id):
-    url = f"https://api.spotify.com/v1/artists/{artist_id}"
-    headers = get_auth_header(token)
-    response = get(url, headers=headers)
-    json_response = response.json()["name"]
-    return json_response
-
-def get_playlist_by_id(token, playlist_id):
+# Returns list of tracks and their respective artist from given Playlist ID
+def get_tracks_from_playlist(token, playlist_id):
     url = f"https://api.spotify.com/v1/playlists/{playlist_id}"
     headers = get_auth_header(token)
     response = get(url, headers=headers)
-    json_response = response.json()["tracks"]
-    return json_response
 
-token = get_token()
+    playlistName = response.json()["name"]
+    json_response = response.json()["tracks"]["items"]
 
-# get_artist_by_id(token, {ARTIST ID GOES HERE})
-# result = get_playlist_by_id(token, {PLAYLIST ID GOES HERE})
-# for item in result["items"]:
-#     print(item["track"]["name"])
+    trackList = []
+
+    for item in json_response:
+        artist = item["track"]["artists"][0]["name"]
+        songTitle = item["track"]["name"]
+
+        trackList.append(artist + " " + songTitle)
+
+    return playlistName, trackList
